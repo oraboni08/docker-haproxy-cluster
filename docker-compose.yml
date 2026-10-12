@@ -1,22 +1,57 @@
 services:
   frontend:
-    # TODO: Add frontend service
-
-  backend:
-    # TODO: Add backend service
+    build: ./frontend
+    container_name: react_frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - app_net
 
   haproxy:
     image: haproxy:2.8
-    volumes:
-      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    container_name: haproxy_lb
     ports:
-      - "80:80"
+      - "8080:80"
+      - "1936:1936"
+    volumes:
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     depends_on:
-      - frontend
-      - backend
+      - api1
+      - api2
+      - api3
     networks:
-      - app-net
+      - app_net
+
+  api1:
+    build: ./backend
+    container_name: fastapi_node_1
+    environment:
+      - NODE_NAME=Nodo Alpha
+      - NODE_COLOR=#38bdf8
+    networks:
+      - app_net
+
+  api2:
+    build: ./backend
+    container_name: fastapi_node_2
+    environment:
+      - NODE_NAME=Nodo Beta
+      - NODE_COLOR=#a855f7
+    networks:
+      - app_net
+
+  api3:
+    build: ./backend
+    container_name: fastapi_node_3
+    environment:
+      - NODE_NAME=Nodo Gamma
+      - NODE_COLOR=#10b981
+    networks:
+      - app_net
 
 networks:
-  app-net:
+  app_net:
     driver: bridge

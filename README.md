@@ -1,107 +1,49 @@
-# 🧪 Challenge: Load Balancing with HAProxy + Docker + React + FastAPI + JMeter
+# 🤖 Scalable Web Architecture: FastAPI + React + HAProxy (Docker)
 
-This project is a hands-on challenge designed to help you explore containerization, load balancing, and performance testing using real-world tools.
-
-<p align="center">
-  <img src="docs/architecture.png" alt="Diagram" width="400"/>
-</p>
-<p align="center">
-<em>Figure 1: Architecture diagram showing HAProxy in front of backend services</em>
+Sistema web altamente escalable y desacoplado, diseñado e implementado dentro de un entorno contenedorizado con Docker. La arquitectura integra una interfaz interactiva en **React**, un clúster de tres nodos backend construidos en **FastAPI** y un balanceador de carga de alto rendimiento **HAProxy** configurado con distribución *Round Robin*, monitoreo en tiempo real e aislamiento de red.
 
 ---
 
-## 🎯 Objectives
+## 📐 Arquitectura del Sistema
 
-You will:
+                     ┌───────────────────────┐
+                     │   Usuario / Browser   │
+                     └───────────┬───────────┘
+                                 │
+                     ┌───────────▼───────────┐
+                     │ React Frontend (3000) │
+                     └───────────┬───────────┘
+                                 │
+                     ┌───────────▼───────────┐
+                     │ HAProxy Load Balancer │ (Port 8080 / Stats: 1936)
+                     └───────────┬───────────┘
+                                 │
+     ┌───────────────────────────┼───────────────────────────┐
+     │ (Round Robin Distribution │ app_net Bridge Network)   │
+     ▼                           ▼                           ▼
+┌──────────────────┐        ┌──────────────────┐        ┌──────────────────┐
+│ FastAPI - Node 1 │        │ FastAPI - Node 2 │        │ FastAPI - Node 3 │
+│   (Nodo Alpha)   │        │   (Nodo Beta)    │        │   (Nodo Gamma)   │
+└──────────────────┘        └──────────────────┘        └──────────────────┘
 
-1. Containerize a frontend and backend application.
-2. Set up HAProxy to load balance between multiple backend instances.
-3. Connect all services using Docker Compose.
-4. Run the full app stack locally.
-5. Design and execute load tests using Apache JMeter.
-
----
-
-## 🧱 Project Structure
-
-You are expected to create the following directory structure:
-
-```
-.
-├── backend/
-│   │   main.py
-│   └── Dockerfile
-├── frontend/
-│   ├── src/
-│   │   └── App.jsx
-│   │   └── main.jsx
-│   ├── index.html
-│   └── Dockerfile
-│   └── package.json
-│   └── vite.config.js
-├── haproxy/
-│   └── haproxy.cfg
-├── docker-compose.yml
-└── README.md
-```
-
-You must create all missing files from scratch as part of the challenge. (dockerfile and docker-compose)
+### Componentes Clave:
+1. **Frontend (React + Vite):** Interfaz gráfica inspirada en una estética de *Data & AI* con métricas de conexión, indicadores visuales de nodo activo por color y simulación de peticiones en tiempo real.
+2. **Load Balancer (HAProxy 2.8):** Gestiona el tráfico entrante en el puerto público `8080`, aplicando el algoritmo `roundrobin` con *health checks* continuos. Además, expone un dashboard de estadísticas en el puerto `1936`.
+3. **Backend Cluster (FastAPI / Uvicorn):** Tres microservicios independientes (`api1`, `api2`, `api3`) aislados en una red privada interna (`app_net`), identificados dinámicamente mediante variables de entorno (`NODE_NAME`, `NODE_COLOR`).
 
 ---
 
-## 🔧 Tasks
+## 🛠️ Requisitos Previos
 
-### 1. Generate Dockerfiles
-
-- Create a `Dockerfile` for the **backend** using Python and FastAPI.
-- Create a `Dockerfile` for the **frontend** using React and Vite.
-- Ensure each image exposes the correct ports and builds successfully.
+* **Docker Desktop** (versión 20.10+ o superior)
+* **Docker Compose** (v2.0+)
+* **Apache Bench (`ab`)** o **Apache JMeter** (para pruebas de carga)
 
 ---
 
-### 2. Complete the Docker Compose Setup
+## 🚀 Despliegue Local
 
-- Define services for:
-  - Two (or more) backend containers
-  - One HAProxy container
-  - One frontend container
-- Configure dependencies and port mappings
-- Map a custom HAProxy config file to the HAProxy container
-
----
-
-### 3. Run the App Locally
-
-- Use `docker compose up --build`
-- Access the frontend through the exposed port
-- Verify that the frontend communicates with the backend through HAProxy
-
----
-
-### 4. Run Load Tests Using JMeter
-
-- Design a test plan in Apache JMeter to simulate concurrent users making HTTP requests to the backend via HAProxy.
-- Use different listeners such as:
-  - View Results Tree
-  - Summary Report
-  - Response Time Graph
-- Experiment with different numbers of users and request patterns.
-
-
----
-
-## 🧠 Hints
-
-- Use a `balance` strategy in HAProxy like `roundrobin` or `leastconn`
-- Make sure all services are reachable from within the Docker network
-- Keep logs and metrics to understand how HAProxy is routing traffic
-
----
-
-## ✅ Deliverables
-
-- Your completed repository with:
-  - All configuration and Docker files
-  - Screenshots or reports from JMeter test results
-
----
+### 1. Clonar el repositorio
+```bash
+git clone [https://github.com/tu-usuario/docker-haproxy.git](https://github.com/tu-usuario/docker-haproxy.git)
+cd docker-haproxy
