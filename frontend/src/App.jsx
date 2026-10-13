@@ -10,7 +10,7 @@ function App() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8080/api/data');
+      const response = await fetch('/api/data');
       const data = await response.json();
       
       setPreviousNode(nodeData ? nodeData.node_name : null);

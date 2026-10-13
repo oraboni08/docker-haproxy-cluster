@@ -2,8 +2,7 @@ services:
   frontend:
     build: ./frontend
     container_name: react_frontend
-    ports:
-      - "3000:3000"
+    # Ya no expone puertos al host, solo se comunica en la red app_net
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -14,11 +13,12 @@ services:
     image: haproxy:2.8
     container_name: haproxy_lb
     ports:
-      - "8080:80"
+      - "80:80"        # Mapea el puerto 80 estándar HTTP
       - "1936:1936"
     volumes:
       - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     depends_on:
+      - frontend
       - api1
       - api2
       - api3
