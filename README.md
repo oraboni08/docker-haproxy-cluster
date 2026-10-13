@@ -1,6 +1,6 @@
 # 🤖 Scalable Web Architecture: FastAPI + React + HAProxy (Docker)
 
-Sistema web altamente escalable y desacoplado, diseñado e implementado dentro de un entorno contenedorizado con Docker. La arquitectura integra una interfaz interactiva en **React**, un clúster de tres nodos backend construidos en **FastAPI** y un balanceador de carga de alto rendimiento **HAProxy** configurado con distribución *Round Robin*, monitoreo en tiempo real e aislamiento de red.
+Sistema web altamente escalable y desacoplado, diseñado e implementado dentro de un entorno contenedorizado con Docker. La arquitectura integra una interfaz interactiva en **React**, un clúster de tres nodos backend construidos en **FastAPI** y un balanceador de carga de alto rendimiento **HAProxy** configurado para servir todo el tráfico en el puerto HTTP estándar (`80`) con distribución *Round Robin*, monitoreo en tiempo real e aislamiento de red.
 
 ---
 
@@ -11,25 +11,29 @@ Sistema web altamente escalable y desacoplado, diseñado e implementado dentro d
                      └───────────┬───────────┘
                                  │
                      ┌───────────▼───────────┐
-                     │ React Frontend (3000) │
-                     └───────────┬───────────┘
-                                 │
-                     ┌───────────▼───────────┐
-                     │ HAProxy Load Balancer │ (Port 8080 / Stats: 1936)
-                     └───────────┬───────────┘
-                                 │
-     ┌───────────────────────────┼───────────────────────────┐
-     │ (Round Robin Distribution │ app_net Bridge Network)   │
-     ▼                           ▼                           ▼
-┌──────────────────┐        ┌──────────────────┐        ┌──────────────────┐
-│ FastAPI - Node 1 │        │ FastAPI - Node 2 │        │ FastAPI - Node 3 │
-│   (Nodo Alpha)   │        │   (Nodo Beta)    │        │   (Nodo Gamma)   │
-└──────────────────┘        └──────────────────┘        └──────────────────┘
+                     │ HAProxy Load Balancer │ (Port 80 / Stats: 1936)
+                     └─────┬───────────┬─────┘
+                           │           │
+     ┌─────────────────────┘           └─────────────────────┐
+     │ (Proxy / -> React)                    (Round Robin /api -> FastAPI)
+     ▼                                                       ▼
+┌──────────────────┐                           ┌──────────────────────────────────┐
+│ React Frontend   │                           │       app_net Bridge Network     │
+│ (Puerto interno) │                           └──────┬────────────┬────────────┬─┘
+└──────────────────┘                                  │            │            │
+                                                      ▼            ▼            ▼
+                                                 ┌──────────┐ ┌──────────┐ ┌──────────┐
+                                                 │ FastAPI  │ │ FastAPI  │ │ FastAPI  │
+                                                 │  Node 1  │ │  Node 2  │ │  Node 3  │
+                                                 │ (Alpha)  │ │  (Beta)  │ │ (Gamma)  │
+                                                 └──────────┘ └──────────┘ └──────────┘
+
+---
 
 ### Componentes Clave:
-1. **Frontend (React + Vite):** Interfaz gráfica inspirada en una estética de *Data & AI* con métricas de conexión, indicadores visuales de nodo activo por color y simulación de peticiones en tiempo real.
-2. **Load Balancer (HAProxy 2.8):** Gestiona el tráfico entrante en el puerto público `8080`, aplicando el algoritmo `roundrobin` con *health checks* continuos. Además, expone un dashboard de estadísticas en el puerto `1936`.
-3. **Backend Cluster (FastAPI / Uvicorn):** Tres microservicios independientes (`api1`, `api2`, `api3`) aislados en una red privada interna (`app_net`), identificados dinámicamente mediante variables de entorno (`NODE_NAME`, `NODE_COLOR`).
+1. **HAProxy Load Balancer (Puerto 80):** Actúa como puerta de entrada única (*Reverse Proxy*). Enruta el tráfico raíz (`/`) hacia el contenedor del Frontend y el tráfico dinámico (`/api/`) hacia el clúster de backends usando el algoritmo `roundrobin`. Además, expone un dashboard de estadísticas en el puerto `1936`.
+2. **Frontend (React + Vite):** Interfaz gráfica de usuario con estética de *Data & AI*, integrada mediante llamadas relativas (`/api/data`) atendidas directamente por HAProxy.
+3. **Backend Cluster (FastAPI / Uvicorn):** Tres microservicios independientes (`api1`, `api2`, `api3`) aislados dentro de una red privada virtual (`app_net`), identificados dinámicamente mediante variables de entorno (`NODE_NAME`, `NODE_COLOR`).
 
 ---
 
@@ -45,5 +49,5 @@ Sistema web altamente escalable y desacoplado, diseñado e implementado dentro d
 
 ### 1. Clonar el repositorio
 ```bash
-git clone [https://github.com/tu-usuario/docker-haproxy.git](https://github.com/tu-usuario/docker-haproxy.git)
-cd docker-haproxy
+git clone [https://github.com/oraboni08/docker-haproxy-cluster.git](https://github.com/oraboni08/docker-haproxy-cluster.git)
+cd docker-haproxy-cluster
