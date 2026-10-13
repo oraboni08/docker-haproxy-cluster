@@ -5,7 +5,7 @@ Sistema web altamente escalable y desacoplado, diseñado e implementado dentro d
 ---
 
 ## 📐 Arquitectura del Sistema
-
+```
 
                   +-----------------------+
                   |   Usuario / Browser   |
@@ -33,6 +33,7 @@ Sistema web altamente escalable y desacoplado, diseñado e implementado dentro d
                            |  (Alpha)  |     |  (Beta)   |     |  (Gamma)  |
                            +-----------+     +-----------+     +-----------+
                            [-------- Red Interna app_net --------]
+```
 
 ### Componentes Clave:
 
