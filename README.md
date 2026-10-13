@@ -6,29 +6,18 @@ Sistema web altamente escalable y desacoplado, diseñado e implementado dentro d
 
 ## 📐 Arquitectura del Sistema
 
-                     ┌───────────────────────┐
-                     │   Usuario / Browser   │
-                     └───────────┬───────────┘
-                                 │
-                     ┌───────────▼───────────┐
-                     │ HAProxy Load Balancer │ (Port 80 / Stats: 1936)
-                     └─────┬───────────┬─────┘
-                           │           │
-     ┌─────────────────────┘           └─────────────────────┐
-     │ (Proxy / -> React)                    (Round Robin /api -> FastAPI)
-     ▼                                                       ▼
-┌──────────────────┐                           ┌──────────────────────────────────┐
-│ React Frontend   │                           │       app_net Bridge Network     │
-│ (Puerto interno) │                           └──────┬────────────┬────────────┬─┘
-└──────────────────┘                                  │            │            │
-                                                      ▼            ▼            ▼
-                                                 ┌──────────┐ ┌──────────┐ ┌──────────┐
-                                                 │ FastAPI  │ │ FastAPI  │ │ FastAPI  │
-                                                 │  Node 1  │ │  Node 2  │ │  Node 3  │
-                                                 │ (Alpha)  │ │  (Beta)  │ │ (Gamma)  │
-                                                 └──────────┘ └──────────┘ └──────────┘
+```mermaid
+graph TD
+    User[👤 Usuario / Navegador] -->|HTTP:80| HAProxy[⚖️ HAProxy Load Balancer]
+    
+    subgraph Red Interna Docker (app_net)
+        HAProxy -->|Proxy /| ReactApp[⚛️ React Frontend]
+        HAProxy -->|Round Robin /api| API1[🐍 FastAPI Node 1 - Alpha]
+        HAProxy -->|Round Robin /api| API2[🐍 FastAPI Node 2 - Beta]
+        HAProxy -->|Round Robin /api| API3[🐍 FastAPI Node 3 - Gamma]
+    end
 
----
+    HAProxy -.->|Stats Page :1936| Dashboard[📊 HAProxy Dashboard]
 
 ### Componentes Clave:
 1. **HAProxy Load Balancer (Puerto 80):** Actúa como puerta de entrada única (*Reverse Proxy*). Enruta el tráfico raíz (`/`) hacia el contenedor del Frontend y el tráfico dinámico (`/api/`) hacia el clúster de backends usando el algoritmo `roundrobin`. Además, expone un dashboard de estadísticas en el puerto `1936`.
